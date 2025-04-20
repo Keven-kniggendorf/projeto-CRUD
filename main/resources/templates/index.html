@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        /* Fundo com degradê preto e cinza */
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #000, #444);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        /* Container do login */
+        .container {
+            background-color: rgba(0, 0, 0, 0.85);
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+            width: 320px;
+            text-align: center;
+            color: white;
+        }
+
+        /* Estilo do título */
+        h2 {
+            margin-bottom: 20px;
+            color: #fff;
+        }
+
+        /* Inputs com fundo preto */
+        input {
+            width: calc(100% - 24px); /* Ajuste para compensar padding+border */
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #666;
+            border-radius: 4px;
+            background-color: #222;
+            color: white;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Botão Entrar - AGORA ALINHADO COM OS INPUTS */
+        #btnEntrar {
+            width: calc(100% - 24px); /* Mesma largura que os inputs */
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            background-color: #28a745;
+            color: white;
+            transition: background-color 0.3s;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        #btnEntrar:hover {
+            background-color: #218838;
+        }
+
+        /* Botões vermelhos */
+        .btn-vermelho {
+            background-color: #dc3545;
+            color: white;
+            text-decoration: none;
+            padding: 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            display: block;
+            text-align: center;
+            transition: background-color 0.3s;
+        }
+
+        .btn-vermelho:hover {
+            background-color: #c82333;
+        }
+
+        /* Layout dos botões */
+        .links {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .links a {
+            flex: 1;
+        }
+
+        /* Botão Cadastro Produto */
+        #cadastroProduto {
+            width: 80%;
+            margin: 8px auto;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Login</h2>
+    <input type="text" id="usuario" placeholder="Usuário" required>
+    <input type="password" id="senha" placeholder="Senha" required>
+    <button id="btnEntrar">Entrar</button>
+
+    <div class="links">
+        <a href="/cadastro-cliente" class="btn-vermelho">Cadastro Cliente</a>
+        <a href="/cadastro-usuario" class="btn-vermelho">Cadastro Usuário</a>
+    </div>
+
+    <a href="/cadastro-produto" id="cadastroProduto" class="btn-vermelho">Cadastro Produto</a>
+</div>
+
+<script>
+    document.getElementById('btnEntrar').addEventListener('click', function() {
+        const usuario = document.getElementById('usuario').value;
+        const senha = document.getElementById('senha').value;
+
+        if (usuario === 'usuarioExemplo' && senha === 'senha123') {
+            window.location.href = '/consulta-servicos';
+        } else {
+            alert('Usuário ou senha inválidos!');
+        }
+    });
+</script>
+
+</body>
+</html>

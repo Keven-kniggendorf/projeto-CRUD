@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadastro de Usuário</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: url('https://www.transparenttextures.com/patterns/wood-pattern.png') repeat; /* Textura de madeira */
+      background-color: #2f2f2f; /* Cor de fundo escura */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      color: #fff; /* Texto em branco */
+    }
+    .container {
+      background-color: rgba(0, 0, 0, 0.8); /* Fundo escuro e transparente */
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+    h2 {
+      margin-bottom: 20px;
+      color: #f1f1f1;
+      font-size: 1.5em;
+    }
+    input, select {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 1em;
+      box-sizing: border-box;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: #4CAF50;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1em;
+      margin-top: 10px;
+    }
+    button:hover {
+      background-color: #218838;
+    }
+    .back-link {
+      width: 100%;
+      padding: 12px;
+      background-color: #dc3545; /* Botão vermelho */
+      color: white;
+      border: none;
+      border-radius: 4px;
+      text-align: center;
+      font-size: 1em;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .back-link:hover {
+      background-color: #c82333;
+    }
+    .erro {
+      color: red;
+      font-size: 0.9em;
+    }
+    .sucesso {
+      display: none;
+      color: green;
+      font-size: 1em;
+      text-align: center;
+      margin-top: 10px;
+      animation: fadeIn 2s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h2>Cadastro de Usuário</h2>
+  <form id="cadastroUsuarioForm">
+    <input type="text" id="nome" placeholder="Nome" required>
+    <span id="erroNome" class="erro"></span>
+    <input type="text" id="usuario" placeholder="Usuário" required>
+    <span id="erroUsuario" class="erro"></span>
+    <input type="password" id="senha" placeholder="Senha" required>
+    <select id="perfil" required>
+      <option value="" disabled selected>Selecione o perfil</option>
+      <option value="admin">Admin</option>
+      <option value="user">Usuário</option>
+    </select>
+    <button type="submit">Cadastrar</button>
+  </form>
+  <button class="back-link" onclick="window.location.href='/'">Voltar para Login</button>
+  <div id="mensagemSucesso" class="sucesso">Usuário cadastrado com sucesso!</div>
+</div>
+
+<script>
+  // Função que lida com o evento de submit do formulário
+  function handleSubmit(event) {
+    event.preventDefault(); // Evita o envio padrão do formulário
+
+    const nome = document.getElementById('nome').value;
+    const usuario = document.getElementById('usuario').value;
+    const senha = document.getElementById('senha').value;
+    const perfil = document.getElementById('perfil').value;
+    const erroNome = document.getElementById('erroNome');
+    const erroUsuario = document.getElementById('erroUsuario');
+    const mensagemSucesso = document.getElementById('mensagemSucesso');
+
+    erroNome.textContent = ""; // Limpa qualquer erro anterior
+    erroUsuario.textContent = ""; // Limpa qualquer erro anterior
+
+    // Verifica se o nome contém números
+    if (/\d/.test(nome)) {
+      erroNome.textContent = "O nome não pode conter números.";
+      return;
+    }
+
+    const usuarioData = {
+      estado: true,
+      nome: nome,
+      usuario: usuario,
+      senha: senha,
+      perfil: perfil
+    };
+
+    fetch('/api/usuarios', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(usuarioData)
+    })
+            .then(response => response.json())
+            .then(data => {
+              if (data) {  //
+                mensagemSucesso.style.display = 'block';  // Exibe a mensagem de sucesso
+                setTimeout(() => {
+                  mensagemSucesso.style.display = 'none';  // Oculta a mensagem após 3 segundos
+                  document.getElementById('cadastroUsuarioForm').reset();  // Reseta o formulário
+                }, 3000);
+              } else {
+                alert('Erro ao cadastrar usuário.');
+              }
+            })
+            .catch(error => {
+              console.error('Erro:', error);
+              alert('Erro ao conectar com o servidor.');
+            });
+  }
+
+  // Adiciona o evento de submit ao formulário
+  document.getElementById('cadastroUsuarioForm').addEventListener('submit', handleSubmit);
+</script>
+</body>
+</html>

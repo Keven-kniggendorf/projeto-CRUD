@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Agendamento Confirmado</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .container {
+            background-color: #1f1f1f;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 0 15px #0f0;
+        }
+
+        h2 {
+            color: #0f0;
+            margin-bottom: 20px;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            padding: 5px 0;
+        }
+
+        .voltar {
+            margin-top: 20px;
+            background-color: #28a745;
+            padding: 10px;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .voltar:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Agendamento Confirmado! ✅</h2>
+    <p><strong>Cliente:</strong> <span id="nomeCliente"></span></p>
+    <p><strong>Barbeiro:</strong> <span id="nomeBarbeiro"></span></p>
+    <p><strong>Data e Hora:</strong> <span id="dataHora"></span></p>
+    <p><strong>Serviços:</strong></p>
+    <ul id="listaServicos"></ul>
+    <p><strong>Total:</strong> R$ <span id="valorTotal"></span></p>
+
+    <button class="voltar" onclick="voltarInicio()">Voltar para início</button>
+</div>
+
+<script>
+    const agendamento = JSON.parse(localStorage.getItem("agendamento"));
+
+    if (!agendamento) {
+        window.location.href = "/consulta-servicos"; // se abrir direto sem agendar
+    }
+
+    document.getElementById("nomeCliente").textContent = agendamento.nomeCliente;
+    document.getElementById("nomeBarbeiro").textContent = agendamento.nomeBarbeiro;
+    document.getElementById("dataHora").textContent = agendamento.dataHora.replace("T", " ");
+    document.getElementById("valorTotal").textContent = agendamento.valorTotal.toFixed(2);
+
+    const ul = document.getElementById("listaServicos");
+    agendamento.nomesProdutos.forEach(produto => {
+        const li = document.createElement("li");
+        li.textContent = produto;
+        ul.appendChild(li);
+    });
+
+    function voltarInicio() {
+        localStorage.removeItem("agendamento");
+        window.location.href = "/consulta-servicos";
+    }
+</script>
+
+</body>
+</html>

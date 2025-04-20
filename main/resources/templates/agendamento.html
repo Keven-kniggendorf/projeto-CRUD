@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Agendamento</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #fff;
+      padding: 40px;
+    }
+
+    .container {
+      background-color: #222;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    h2 {
+      color: #0f0;
+    }
+
+    input, textarea, button {
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+    }
+
+    button {
+      background-color: #28a745;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #218838;
+    }
+
+    .resumo {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #333;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>Finalizar Agendamento</h2>
+
+  <label for="data">Data:</label>
+  <input type="date" id="data">
+
+  <label for="hora">Hora:</label>
+  <input type="time" id="hora">
+
+<!--  <label for="observacoes">Observações:</label>-->
+<!--  <textarea id="observacoes" rows="3" placeholder="Ex: barba com navalha, corte na tesoura..."></textarea>-->
+
+  <div class="resumo" id="resumo">
+    <strong>Serviços selecionados:</strong>
+    <ul id="listaServicos"></ul>
+    <strong>Valor total:</strong> <span id="valorTotal">R$ 0,00</span>
+  </div>
+
+
+  <button onclick="confirmarAgendamento()">Confirmar Agendamento</button>
+</div>
+
+<script>
+  let produtosSelecionados = [];
+
+  // Simulação: você pegaria isso via fetch do back, se já estiver guardando temporariamente
+  fetch('/api/produtos-temporarios/selecionados')
+          .then(res => res.json())
+          .then(data => {
+            produtosSelecionados = data;
+            const lista = document.getElementById("listaServicos");
+            console.log("Produtos retornados:", data)
+            let total = 0;
+            data.forEach(p => {
+              const li = document.createElement("li");
+              li.textContent = `${p.nome} - R$ ${p.preco.toFixed(2)}`;
+              lista.appendChild(li);
+              total += p.preco;
+            });
+            document.getElementById("valorTotal").textContent = `R$ ${total.toFixed(2)}`;
+          });
+
+  function confirmarAgendamento() {
+    const data = document.getElementById("data").value;
+    const hora = document.getElementById("hora").value;
+
+    if (!data || !hora) {
+      alert("Preencha data e hora!");
+      return;
+    }
+
+    const dataHora = `${data}T${hora}`;
+
+    const dto = {
+      dataHora: dataHora,
+      cliente: '14bff16c-3d23-4ab1-891d-a6d2dbf2fb01', // colocar real depois
+      barbeiro: 'f95e5941-255c-43ec-8d38-78c1f1f029b2', // colocar real depois
+      produtos: produtosSelecionados.map(p => p.uuid)
+    };
+
+    fetch('/agendamento', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(dto)
+    })
+            .then(res => {
+              if (!res.ok) {
+                throw new Error("Erro ao confirmar agendamento!");
+              }
+              return res.json(); // pega o corpo da resposta
+            })
+            .then(agendamento => {
+              localStorage.setItem("agendamento", JSON.stringify(agendamento));
+              window.location.href = "/sucesso-agendamento"; // redireciona para a tela de sucesso
+            })
+            .catch(() => {
+              alert("Erro ao confirmar agendamento!");
+            });
+
+  }
+
+</script>
+</body>
+</html>

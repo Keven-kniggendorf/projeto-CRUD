@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadastro de Cliente</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: url('https://www.transparenttextures.com/patterns/wood-pattern.png') repeat; /* Textura de madeira */
+      background-color: #2f2f2f; /* Cor de fundo escura */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      color: #fff; /* Texto em branco */
+    }
+    .container {
+      background-color: rgba(0, 0, 0, 0.7); /* Fundo escuro e transparente */
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+    h2 {
+      margin-bottom: 20px;
+      color: #f1f1f1;
+      font-size: 1.5em;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+      font-size: 1em;
+    }
+    input:focus {
+      outline: none;
+      border-color: #4CAF50;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 1.1em;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #218838;
+    }
+    .erro {
+      color: red;
+      font-size: 0.9em;
+      margin-top: 5px;
+    }
+    .sucesso {
+      display: none;
+      color: green;
+      font-size: 1.1em;
+      margin-top: 15px;
+      padding: 10px;
+      border: 2px solid green;
+      border-radius: 6px;
+      background-color: #d4edda;
+    }
+    .erro, .sucesso {
+      animation: fadeIn 1s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h2>Cadastro Cliente</h2>
+  <form id="cadastroClienteForm" onsubmit="return validarFormulario()">
+    <input type="text" id="nome" placeholder="Nome" required>
+    <span id="erroNome" class="erro"></span>
+    <input type="text" id="telefone" placeholder="Telefone" required>
+    <span id="erroTelefone" class="erro"></span>
+    <input type="email" id="email" placeholder="Email" required>
+    <span id="erroEmail" class="erro"></span>
+    <button type="submit">Cadastrar</button>
+  </form>
+  <div id="mensagemSucesso" class="sucesso">Cliente cadastrado com sucesso!</div>
+</div>
+
+<script>
+  document.getElementById('cadastroClienteForm').addEventListener('submit', function (event) {
+    event.preventDefault();
+    if (validarFormulario()) {
+      const nome = document.getElementById('nome').value;
+      const telefone = document.getElementById('telefone').value.replace(/\D/g, ''); // Remove formatação antes de enviar
+      const email = document.getElementById('email').value;
+
+      const cliente = {
+        nome: nome,
+        telefone: telefone, // Envia o telefone sem formatação
+        email: email
+      };
+
+      fetch('/api/clientes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(cliente)
+      })
+              .then(response => response.json())
+              .then(data => {
+                console.log('Success:', data);
+                // Exibe a mensagem de sucesso
+                const mensagemSucesso = document.getElementById('mensagemSucesso');
+                mensagemSucesso.style.display = 'block';
+                setTimeout(() => {
+                  mensagemSucesso.style.display = 'none'; // Oculta a mensagem após 3 segundos
+                  document.getElementById('cadastroClienteForm').reset();  // Reseta o formulário
+                }, 3000);
+              })
+              .catch((error) => {
+                console.error('Error:', error);
+                alert('Erro ao cadastrar cliente.');
+              });
+    } else {
+      console.log("Erro na validação dos dados.");
+    }
+  });
+
+  const telefoneInput = document.getElementById('telefone');
+
+  telefoneInput.addEventListener('input', (e) => {
+    let valor = e.target.value.replace(/\D/g, ''); // Remove tudo que não for dígito
+    if (valor.length > 10) {
+      valor = valor.replace(/^(\d{2})(\d{5})(\d{4}).*/, '($1) $2-$3'); // Formato com 11 dígitos
+    } else if (valor.length > 5) {
+      valor = valor.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, '($1) $2-$3'); // Formato com 10 dígitos
+    } else if (valor.length > 2) {
+      valor = valor.replace(/^(\d{2})(\d{0,4})/, '($1) $2'); // Formato com DDD e início do número
+    } else {
+      valor = valor.replace(/^(\d*)/, '($1'); // Apenas o DDD
+    }
+    e.target.value = valor; // Atualiza o valor formatado no campo
+  });
+
+  function validarFormulario() {
+    // Obtém os valores dos campos
+    const nome = document.getElementById("nome").value;
+    const telefone = document.getElementById("telefone").value.replace(/\D/g, ''); // Remove a formatação
+    const email = document.getElementById("email").value;
+
+    // Expressões regulares para validar os campos
+    const regexNome = /^[A-Za-zÀ-ÿ\s]+$/; // Aceita apenas letras e espaços
+    const regexTelefone = /^[0-9]{11}$/; // Permite exatamente 11 dígitos numéricos (sem formatação)
+    const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Valida o email
+
+    // Limpa as mensagens de erro anteriores
+    document.getElementById("erroNome").textContent = "";
+    document.getElementById("erroTelefone").textContent = "";
+    document.getElementById("erroEmail").textContent = "";
+
+    let validacao = true;
+
+    // Valida o campo nome
+    if (!nome) {
+      document.getElementById("erroNome").textContent = "O campo nome não pode ser vazio.";
+      validacao = false;
+    } else if (!regexNome.test(nome)) {
+      document.getElementById("erroNome").textContent = "O nome não pode conter números ou caracteres especiais.";
+      validacao = false;
+    }
+
+    // Valida o campo telefone
+    if (!telefone) {
+      document.getElementById("erroTelefone").textContent = "O campo telefone não pode ser vazio.";
+      validacao = false;
+    } else if (!regexTelefone.test(telefone)) {
+      document.getElementById("erroTelefone").textContent = "O telefone deve conter exatamente 11 números.";
+      validacao = false;
+    }
+
+    // Valida o campo email
+    if (!email) {
+      document.getElementById("erroEmail").textContent = "O campo email não pode ser vazio.";
+      validacao = false;
+    } else if (!regexEmail.test(email)) {
+      document.getElementById("erroEmail").textContent = "O email deve conter um '@' e um domínio válido.";
+      validacao = false;
+    }
+
+    // Se algum erro ocorrer, retorna false para impedir o envio do formulário
+    return validacao;
+  }
+</script>
+</body>
+</html>

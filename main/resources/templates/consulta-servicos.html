@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Consulta de Produtos</title>
+  <style>
+    /* Estilos gerais */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: url('https://source.unsplash.com/1600x900/?barber-shop') no-repeat center center fixed;
+      background-size: cover;
+    }
+
+    .container {
+      background-color: rgba(0, 0, 0, 0.85);
+      padding: 20px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 600px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      text-align: center;
+    }
+
+    h2 {
+      color: #fff;
+      margin-bottom: 15px;
+    }
+
+    .filter-container {
+      margin-bottom: 15px;
+    }
+
+    select, button {
+      padding: 10px;
+      font-size: 1em;
+      margin: 5px;
+      border-radius: 5px;
+      border: none;
+    }
+
+    select {
+      background-color: #fff;
+    }
+
+    button {
+      background-color: #28a745;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #218838;
+    }
+
+    /* Estilos da tabela */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      background-color: #222;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #444;
+      color: #fff;
+    }
+
+    th {
+      background-color: #333;
+      font-weight: bold;
+    }
+
+    tr:hover {
+      background-color: #444;
+    }
+
+    /* Estilo para o botão "Próximo" */
+    #btnProximo {
+      display: none;
+      margin-top: 15px;
+      padding: 10px 20px;
+      font-size: 1em;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    #btnProximo:hover {
+      background-color: #0056b3;
+    }
+
+    /* Estilo para destacar a linha selecionada */
+    tr.selecionado {
+      background-color: #28a745 !important;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>Consulta de Produtos</h2>
+
+  <!-- Filtro de tipo -->
+  <div class="filter-container">
+    <select id="filtroTipo">
+      <option value="">Todos</option>
+      <option value="produto">Produto</option>
+      <option value="servico">Serviço</option>
+    </select>
+    <button onclick="consultar()">Consultar</button>
+  </div>
+
+  <!-- Tabela -->
+  <table id="tabelaProdutos">
+    <thead>
+    <tr>
+      <th>Selecionar</th>
+      <th>Nome</th>
+      <th>Descrição</th>
+      <th>Preço</th>
+    </tr>
+    </thead>
+    <tbody id="tbodyProdutos"></tbody>
+  </table>
+
+  <!-- Botão Próximo -->
+  <button id="btnProximo" onclick="irParaAgendamento()">Próximo</button>
+</div>
+
+<script>
+  let produtosSelecionados = [];
+
+  function consultar() {
+    const filtroTipo = document.getElementById('filtroTipo').value;
+    const tbody = document.getElementById('tbodyProdutos');
+    tbody.innerHTML = "";
+
+    let url = "/api/produtos";
+    if (filtroTipo) {
+      url += `?categoria=${filtroTipo}`;
+    }
+
+    fetch(url)
+            .then(response => response.json())
+            .then(data => {
+              data.forEach(item => {
+                const tr = document.createElement('tr');
+                const uuid = item.uuid || item.id; // Ajuste caso o campo seja "id"
+                tr.dataset.produtoUuid = uuid;
+                tr.innerHTML = `
+            <td><input type="checkbox" class="produtoCheckbox" value="${uuid}" onclick="event.stopPropagation(); atualizarSelecao(this);"></td>
+            <td>${item.nome}</td>
+            <td>${item.descricao}</td>
+            <td>R$ ${item.preco.toFixed(2)}</td>
+          `;
+                tr.addEventListener("click", function () {
+                  const checkbox = this.querySelector(".produtoCheckbox");
+                  checkbox.checked = !checkbox.checked;
+                  atualizarSelecao(checkbox);
+                });
+                tbody.appendChild(tr);
+              });
+            })
+            .catch(error => {
+              console.error('Erro ao consultar produtos:', error);
+            });
+  }
+
+  function atualizarSelecao(checkbox) {
+    const linha = checkbox.closest("tr");
+    if (checkbox.checked) {
+      linha.classList.add("selecionado");
+    } else {
+      linha.classList.remove("selecionado");
+    }
+
+    produtosSelecionados = [...document.querySelectorAll('.produtoCheckbox:checked')]
+            .map(cb => cb.value);
+
+    document.getElementById('btnProximo').style.display =
+            produtosSelecionados.length > 0 ? "block" : "none";
+  }
+
+  function irParaAgendamento() {
+    if (produtosSelecionados.length === 0) {
+      alert('Selecione pelo menos um Produto(s) ou Serviço(s)!');
+      return;
+    }
+
+    fetch('/api/produtos-temporarios/selecionados', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ uuids: produtosSelecionados })
+    })
+            .then(res => {
+              if (!res.ok) {
+                throw new Error("Erro ao salvar produtos selecionados.");
+              }
+              window.location.href = "/agendamento";
+            })
+            .catch(error => {
+              console.error('Erro:', error);
+              alert("Erro ao processar seleção. Tente novamente.");
+            });
+  }
+
+
+  // Executa consulta automática ao abrir a página
+  window.onload = consultar;
+</script>
+
+</body>
+</html>

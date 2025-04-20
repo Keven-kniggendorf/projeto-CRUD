@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadastro de Produto/Serviço</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #000, #444);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background-color: rgba(0, 0, 0, 0.85);
+      padding: 25px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+      width: 320px;
+      color: white;
+    }
+    h2 {
+      margin-bottom: 20px;
+      text-align: center;
+      color: #fff;
+    }
+    input, select {
+      width: calc(100% - 24px);
+      padding: 12px;
+      margin: 10px 0;
+      border: 1px solid #666;
+      border-radius: 4px;
+      background-color: #222;
+      color: white;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    button {
+      width: calc(100% - 24px);
+      padding: 12px;
+      margin: 10px 0;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #218838;
+    }
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 15px;
+      color: #007bff;
+      text-decoration: none;
+      width: 80%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .back-link:hover {
+      text-decoration: underline;
+    }
+    .erro {
+      color: red;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h2>Cadastro de Produto/Serviço</h2>
+  <form id="cadastroProdutoForm">
+    <select id="tipo" required>
+      <option value="" disabled selected>Selecione o tipo</option>
+      <option value="produto">Produto</option>
+      <option value="servico">Serviço</option>
+    </select>
+    <input type="text" id="nome" placeholder="Nome" required>
+    <input type="text" id="descricao" placeholder="Descrição" required>
+    <input type="number" id="preco" placeholder="Preço" step="0.01" required>
+    <input type="number" id="quantidade" placeholder="Quantidade" required>
+    <button type="submit">Cadastrar</button>
+  </form>
+  <a href="/" class="back-link">Voltar para Login</a>
+</div>
+
+<script>
+  function handleSubmit(event) {
+    event.preventDefault();
+
+    const tipo = document.getElementById('tipo').value;
+    const nome = document.getElementById('nome').value;
+    const descricao = document.getElementById('descricao').value;
+    const preco = parseFloat(document.getElementById('preco').value);
+    const quantidade = parseInt(document.getElementById('quantidade').value);
+
+    const produtoData = {
+      tipo: tipo,
+      nome: nome,
+      descricao: descricao,
+      preco: preco,
+      quantidade: quantidade
+    };
+
+    fetch('http://localhost:8080/api/produtos', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(produtoData)
+    })
+            .then(response => {
+              if (!response.ok) {
+                throw new Error('Erro ao cadastrar produto/serviço.');
+              }
+              return response.json();
+            })
+            .then(data => {
+              alert(tipo === 'produto' ? 'Produto cadastrado com sucesso!' : 'Serviço cadastrado com sucesso!');
+              document.getElementById('cadastroProdutoForm').reset();
+            })
+            .catch(error => {
+              console.error('Erro:', error);
+              alert(error.message);
+            });
+  }
+
+  document.getElementById('cadastroProdutoForm').addEventListener('submit', handleSubmit);
+</script>
+</body>
+</html>
