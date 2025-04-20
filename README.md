@@ -1,2 +1,2 @@
 # projeto-CRUD
-Este projeto abrange todo meu conhecimento de Java, arquitetando um CRUD para englobar meu conhecimento como um todo.
+Este projeto abrange todo meu conhecimento de Java, arquitetando um CRUD para englobar meu conhecimento como um todo.(ainda em andamento)...
